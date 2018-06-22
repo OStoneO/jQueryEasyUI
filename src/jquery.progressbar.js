@@ -1,10 +1,14 @@
 /**
- * progressbar - jQuery EasyUI
+ * EasyUI for jQuery 1.5.5.4
  * 
- * Licensed under the GPL terms
- * To use it on other terms please contact us
+ * Copyright (c) 2009-2018 www.jeasyui.com. All rights reserved.
  *
- * Copyright(c) 2009-2012 stworthy [ stworthy@gmail.com ] 
+ * Licensed under the freeware license: http://www.jeasyui.com/license_freeware.php
+ * To use it on other terms please contact us: info@jeasyui.com
+ *
+ */
+/**
+ * progressbar - EasyUI for jQuery
  * 
  * Dependencies:
  * 	 none
@@ -13,7 +17,13 @@
 (function($){
 	function init(target){
 		$(target).addClass('progressbar');
-		$(target).html('<div class="progressbar-text"></div><div class="progressbar-value">&nbsp;</div>');
+		$(target).html('<div class="progressbar-text"></div><div class="progressbar-value"><div class="progressbar-text"></div></div>');
+		$(target).bind('_resize', function(e,force){
+			if ($(this).hasClass('easyui-fluid') || force){
+				setSize(target);
+			}
+			return false;
+		});
 		return $(target);
 	}
 	
@@ -21,8 +31,13 @@
 		var opts = $.data(target, 'progressbar').options;
 		var bar = $.data(target, 'progressbar').bar;
 		if (width) opts.width = width;
-		bar._outerWidth(opts.width);
-		bar.find('div.progressbar-text').width(bar.width());
+		bar._size(opts);
+		
+		bar.find('div.progressbar-text').css('width', bar.width());
+		bar.find('div.progressbar-text,div.progressbar-value').css({
+			height: bar.height()+'px',
+			lineHeight: bar.height()+'px'
+		});
 	}
 	
 	$.fn.progressbar = function(options, param){
@@ -46,16 +61,6 @@
 			}
 			$(this).progressbar('setValue', state.options.value);
 			setSize(this);
-		});
-	};
-	
-	$.fn._outerWidth = function(width){
-		return this.each(function(){
-			if (!$.boxModel && $.browser.msie){
-				$(this).width(width);
-			} else {
-				$(this).width(width - ($(this).outerWidth() - $(this).width()));
-			}
 		});
 	};
 	
@@ -89,16 +94,12 @@
 	};
 	
 	$.fn.progressbar.parseOptions = function(target){
-		var t = $(target);
-		return {
-			width: (parseInt(target.style.width) || undefined),
-			value: (t.attr('value') ? parseInt(t.attr('value')) : undefined),
-			text: t.attr('text')
-		};
+		return $.extend({}, $.parser.parseOptions(target, ['width','height','text',{value:'number'}]));
 	};
 	
 	$.fn.progressbar.defaults = {
 		width: 'auto',
+		height: 22,
 		value: 0,	// percentage value
 		text: '{value}%',
 		onChange:function(newValue,oldValue){}
